@@ -21,7 +21,7 @@ LOG(logDEBUG) << "h4x0r";
 #include <sys/time.h>
 #endif
 
-#define LOG(level) if (level > autil::Log::ReportingLevel()) ; else autil::Log(level).get()
+#define LOG(level) if (level > pclog::Log::ReportingLevel()) ; else pclog::Log(level).get()
 	
 enum PCLogLevel {
 	logERROR, logWARNING, logINFO, logDEBUG,
@@ -60,8 +60,32 @@ public:
 #endif
 
 	inline Log(PCLogLevel level = logINFO) : lv(level) {	}
-	~Log();
+	
+	~Log() {
+#if !defined(_WIN32) && !defined(ANDROID)
+		if (lv == logERROR || lv == logWARNING)
+			std::cout << "\e[0m ";
+#endif
 
+#ifdef ANDROID
+		int ap = ANDROID_LOG_INFO;
+		switch (lv) {
+		case logERROR: ap = ANDROID_LOG_ERROR; break;
+		case logWARNING: ap = ANDROID_LOG_WARN; break;
+		}
+		__android_log_print(ap,
+			"ulltra",
+			"%s",
+			os.str().c_str());
+#else
+		std::cout << std::endl << std::flush;
+#endif
+		
+#ifdef _WIN32
+		if (lv == logERROR || lv == logWARNING)
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), scbi.wAttributes);
+#endif
+	}
 	inline std::ostream& get() {
 
 #ifdef ANDROID
