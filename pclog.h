@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef _PCLOG_HEADER_
+#define _PCLOG_HEADER_
+
 /*
 An efficient logging class that works on Linux, Windows and Android
 Usage:
@@ -119,3 +122,5 @@ public:
 
 	
 }
+
+#endif
