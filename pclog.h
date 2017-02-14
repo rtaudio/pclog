@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef _PCLOG_HEADER_
 #define _PCLOG_HEADER_
 
