@@ -15,6 +15,7 @@ LOG(logDEBUG) << "h4x0r";
 #include <sstream>
 #include <iostream>
 #include <locale>
+#include <mutex>
 
 #ifdef _WIN32
 #include<Windows.h>
@@ -30,6 +31,12 @@ enum PCLogLevel {
 };
 
 namespace pclog {
+
+	inline std::mutex &mutex()
+	{
+		static std::mutex mutex;
+		return mutex;
+	}
 
 
 	inline std::string getErrorString(int rc) {
@@ -60,7 +67,9 @@ public:
 	std::ostringstream os;
 #endif
 
-	inline Log(PCLogLevel level = logINFO) : lv(level) {	}
+	inline Log(PCLogLevel level = logINFO) : lv(level) {
+		mutex().lock(); // TODO: this is very slow, should use buffer
+	}
 	
 	~Log() {
 #if !defined(_WIN32) && !defined(ANDROID)
@@ -86,6 +95,7 @@ public:
 		if (lv == logERROR || lv == logWARNING)
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), scbi.wAttributes);
 #endif
+		mutex().unlock();
 	}
 	inline std::ostream& get() {
 
