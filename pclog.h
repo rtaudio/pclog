@@ -21,6 +21,12 @@ LOG(logDEBUG) << "h4x0r";
 #include<Windows.h>
 #else
 
+#ifdef ANDROID
+
+#include <android/log.h>
+
+#endif
+
 #include <sys/time.h>
 
 #endif
@@ -28,7 +34,10 @@ LOG(logDEBUG) << "h4x0r";
 #define LOG(level) if (level > pclog::Log::ReportingLevel()) ; else pclog::Log(level).get()
 #define LOG_E  LOG(logERROR)
 #define LOG_I  LOG(logINFO)
+#define LOG_W  LOG(logWARNING)
 #define LOG_D  LOG(logDEBUG)
+
+#include "to_string.h"
 
 enum PCLogLevel {
     logERROR, logWARNING, logINFO, logDEBUG,
@@ -42,11 +51,33 @@ namespace pclog {
         return mutex;
     }
 
+#ifdef _WIN32
+    inline std::string getErrorString2(int err = 0)
+    {
+        err = err ? err : WSAGetLastError();
+
+        LPVOID lpMsgBuf;
+        DWORD dw = GetLastError();
+
+        FormatMessage(
+                FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL
+        );
+
+
+        std::string msg((LPTSTR)lpMsgBuf);
+        LocalFree(lpMsgBuf);
+
+        msg += " (" + std::to_string(dw) + ")";
+
+        return msg;
+    }
+#endif
 
     inline std::string getErrorString(int rc) {
         char errmsg[1024];
 #ifdef _WIN32
-        ::strerror_s(errmsg, rc);
+        ::strerror_s(errmsg, sizeof errmsg, rc);
 #else
         strerror_r(rc, errmsg, sizeof errmsg);
 #endif
@@ -54,11 +85,7 @@ namespace pclog {
     }
 
 
-#ifdef ANDROID
 
-#include <android/log.h>
-
-#endif
 
     class Log {
     public:
