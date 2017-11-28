@@ -1,5 +1,4 @@
-#ifndef _PCLOG_HEADER_
-#define _PCLOG_HEADER_
+#pragma once
 
 /*
 An efficient logging class that works on Linux, Windows and Android
@@ -20,15 +19,12 @@ LOG(logDEBUG) << "h4x0r";
 #ifdef _WIN32
 #include<Windows.h>
 #else
-
-#ifdef ANDROID
-
-#include <android/log.h>
-
+#include <sys/time.h>
 #endif
 
-#include <sys/time.h>
-
+#if defined(ANDROID) && !defined(PCLOG_ANDROID_USE_STDOUT)
+	#include <android/log.h>
+	#define PCLOG_ANDROID
 #endif
 
 #define LOG(level) if (level > pclog::Log::ReportingLevel()) ; else pclog::Log(level).get()
@@ -92,23 +88,20 @@ namespace pclog {
         const PCLogLevel lv;
 #ifdef _WIN32
         CONSOLE_SCREEN_BUFFER_INFO scbi;
-#endif
-
-#ifdef ANDROID
+#elif defined(PCLOG_ANDROID)
         std::ostringstream os;
 #endif
-
         inline Log(PCLogLevel level = logINFO) : lv(level) {
             mutex().lock(); // TODO: this is very slow, should use buffer
         }
 
         ~Log() {
-#if !defined(_WIN32) && !defined(ANDROID)
+#if !defined(_WIN32) && !defined(PCLOG_ANDROID)
             if (lv == logERROR || lv == logWARNING)
-                std::cout << "\e[0m ";
+                std::cerr << "\e[0m ";
 #endif
 
-#ifdef ANDROID
+#ifdef PCLOG_ANDROID
             int ap = ANDROID_LOG_INFO;
             switch (lv) {
                 case logERROR:
@@ -125,10 +118,13 @@ namespace pclog {
                     break;
             }
             __android_log_print(ap,
-                                "ulltra",
+                                "pclog",
                                 "%s",
                                 os.str().c_str());
 #else
+            if (lv == logERROR || lv == logWARNING)
+                std::cerr << std::endl << std::flush;
+            else
             std::cout << std::endl << std::flush;
 #endif
 
@@ -141,10 +137,10 @@ namespace pclog {
 
         inline std::ostream &get() {
 
-#ifdef ANDROID
+#ifdef PCLOG_ANDROID
             std::ostream &ls(this->os);
 #else
-            std::ostream& ls(std::cout);
+            std::ostream& ls((lv == logERROR || lv == logWARNING) ? std::cerr : std::cout);
 #endif
 
             std::string cl;
@@ -154,7 +150,7 @@ namespace pclog {
                 GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &scbi);
                 SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), ((lv == logWARNING) ? (FOREGROUND_GREEN|FOREGROUND_RED) : FOREGROUND_RED) | FOREGROUND_INTENSITY);
             }
-#elif !defined(ANDROID)
+#elif !defined(PCLOG_ANDROID)
             if (lv == logERROR)
                 cl = "\e[91m";
             else if (lv == logWARNING)
@@ -168,8 +164,4 @@ namespace pclog {
             return logDEBUG3; // logDebugHttp;
         }
     };
-
-
 }
-
-#endif
