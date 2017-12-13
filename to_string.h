@@ -1,4 +1,4 @@
-
+#include <vector>
 
 template<typename T>
 struct has_to_string_method
