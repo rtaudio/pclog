@@ -36,12 +36,13 @@ LOG(logDEBUG) << "h4x0r";
 #define LOG_I  LOG(logINFO)
 #define LOG_W  LOG(logWARNING)
 #define LOG_D  LOG(logDEBUG)
+#define LOG_V  LOG(logVERBOSE)
 
 #include "to_string.h"
 
 enum PCLogLevel {
 	logERROR, logWARNING, logINFO, logDEBUG,
-	logDEBUG1, logDEBUG2, logDEBUG3, logDEBUG4
+	logDEBUG1, logDEBUG2, logDEBUG3, logDEBUG4, logVERBOSE
 };
 
 namespace pclog {
@@ -101,6 +102,25 @@ namespace pclog {
 
 		}
 
+#ifdef ANDROID
+		inline int androidLogLevel() {
+			switch (lv) {
+				case logERROR:
+					return ANDROID_LOG_ERROR;
+				case logWARNING:
+					return ANDROID_LOG_WARN;
+				case logINFO:
+					return ANDROID_LOG_INFO;
+				case logDEBUG:
+					return ANDROID_LOG_DEBUG;
+				case logVERBOSE:
+					return ANDROID_LOG_VERBOSE;
+				default:
+					return ANDROID_LOG_DEFAULT;
+			}
+		}
+#endif
+
 		~Log() {
 			mutex().lock();
 			std::ostream &os((lv == logERROR || lv == logWARNING) ? std::cerr : std::cout);
@@ -119,24 +139,8 @@ namespace pclog {
 				os <<  "\e[93m";
 #endif
 
-
 #ifdef PCLOG_ANDROID
-			int ap = ANDROID_LOG_INFO;
-			switch (lv) {
-				case logERROR:
-					ap = ANDROID_LOG_ERROR;
-					break;
-				case logWARNING:
-					ap = ANDROID_LOG_WARN;
-					break;
-				case logDEBUG:
-					ap = ANDROID_LOG_DEBUG;
-					break;
-				default:
-					ap = ANDROID_LOG_INFO;
-					break;
-			}
-			__android_log_print(ap, "pclog",  "%s", buf.str().c_str());
+			__android_log_print(androidLogLevel(), "pclog",  "%s", buf.str().c_str());
 #else
 			os << buf.str();
 			if (lv == logERROR || lv == logWARNING) {

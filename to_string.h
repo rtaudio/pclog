@@ -22,14 +22,26 @@ inline std::ostream& operator << (std::ostream& os, const std::vector<std::strin
 	return os;
 }
 
+inline std::ostream& operator << (std::ostream& os, const std::vector<int>& v)
+{
+	os << "";
+	for (auto ii = v.begin(); ii != v.end(); ++ii)
+	{
+		os << " " << *ii<<"";
+		if(ii+1 != v.end()) os << ",";
+	}
+	os << "";
+	return os;
+}
 
-template <typename T>
+
+template <class T>
 inline std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
 {
 	os << "";
 	for (auto ii = v.begin(); ii != v.end(); ++ii)
 	{
-		os << " '" << ii->to_string() <<"'";
+		os << " " << ii->to_string() <<"";
 		if(ii+1 != v.end()) os << std::endl;
 	}
 	os << "";
