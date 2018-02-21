@@ -38,6 +38,8 @@ LOG(logDEBUG) << "h4x0r";
 #define LOG_W  LOG(logWARNING)
 #define LOG_D  LOG(logDEBUG)
 #define LOG_V  LOG(logVERBOSE)
+#define LOG_VAR(vn) " " #vn "=" << vn << " "
+#define LOG_EXPR(vn) " " #vn "=" << vn << " "
 
 #include "to_string.h"
 
