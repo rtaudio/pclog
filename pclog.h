@@ -51,7 +51,7 @@ enum PCLogLevel {
 namespace pclog {
 
     inline std::mutex &mutex() {
-        static std::mutex mutex;
+        static std::mutex mutex{};
         return mutex;
     }
 
@@ -94,16 +94,14 @@ namespace pclog {
     public:
         const PCLogLevel lv;
 #ifdef PCLOG_USE_BUFFER
-        std::ostringstream buf;
+        std::ostringstream buf{};
 #endif
 
 #ifdef _WIN32
         CONSOLE_SCREEN_BUFFER_INFO scbi;
 #endif
 
-        inline Log(PCLogLevel level = logINFO) : lv(level) {
-
-        }
+        inline Log(PCLogLevel lv = logINFO) : lv(lv) { }
 
 #ifdef ANDROID
         inline int androidLogLevel() {
@@ -136,10 +134,8 @@ namespace pclog {
                                         FOREGROUND_INTENSITY);
             }
 #elif !defined(PCLOG_ANDROID)
-            if (lv == logERROR)
-                os << "\e[91m";
-            else if (lv == logWARNING)
-                os <<  "\e[93m";
+            if (lv == logERROR) os << "\033[0;31m";
+            else if (lv == logWARNING)   os << "\033[0;33m";
 #endif
 
 #ifdef PCLOG_ANDROID
@@ -150,7 +146,7 @@ namespace pclog {
 #ifdef _WIN32
                 SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), scbi.wAttributes);
 #else
-                os << "\e[0m ";
+                os << "\033[m";
 #endif
             }
             os << std::endl << std::flush;
