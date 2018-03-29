@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <set>
+#include <unordered_set>
 
 template<typename T>
 struct has_to_string_method {
@@ -105,6 +106,15 @@ static std::basic_ostream<char> &operator<<(std::basic_ostream<char> &os, const 
 template<typename T>
 inline std::ostream &operator<<(std::ostream &os, const std::set<T> &set) {
     os << "set{";
+    for (auto &v:set) os << " '" << v << "' ";
+    os << "}";
+    return os;
+}
+
+
+template<typename T>
+inline std::ostream &operator<<(std::ostream &os, const std::unordered_set<T> &set) {
+    os << "uset{";
     for (auto &v:set) os << " '" << v << "' ";
     os << "}";
     return os;
