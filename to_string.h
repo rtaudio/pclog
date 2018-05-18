@@ -3,6 +3,7 @@
 #include <vector>
 #include <set>
 #include <unordered_set>
+#include <unordered_map>
 
 template<typename T>
 struct has_to_string_method {
@@ -130,16 +131,16 @@ inline std::ostream &operator<<(std::ostream &os, const std::array<T,N> &arr) {
 }
 
 
-/*
-template<typename K,  typename V>
-inline std::ostream &operator<<(std::ostream &os, const std::unordered_map<T,N> &map) {
-    os << "std::unordered_map{";
-    for (auto &p:map) os << " " << p.first << ": " << p.second << ", ";
-    os << "]";
+
+template<typename K,  typename T>
+inline std::ostream &operator<<(std::ostream &os, const std::unordered_map<K,T> &map) {
+    os << "unordered_map{";
+    for (auto &p:map) os << " [[" << p.first << "]]: " << p.second << ", ";
+    os << "}";
     return os;
 }
 
 
-<std::string, influxdb::client::fetchResult>
-*/
+//<std::string, influxdb::client::fetchResult>
+
 
