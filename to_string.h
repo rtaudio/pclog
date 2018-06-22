@@ -22,36 +22,36 @@ struct has_to_string_method {
 
 
 inline std::ostream &operator<<(std::ostream &os, const std::vector<std::string> &v) {
-    os << "";
+    os << "[";
     for (std::vector<std::string>::const_iterator ii = v.begin(); ii != v.end(); ++ii) {
         os << " '" << *ii << "'";
         if (ii + 1 != v.end()) os << ",";
     }
-    os << "";
+    os << "]";
     return os;
 }
 
 
 
 inline std::ostream &operator<<(std::ostream &os, const std::vector<int> &v) {
-    os << "";
+    os << "[";
     for (auto ii = v.begin(); ii != v.end(); ++ii) {
         os << " " << *ii << "";
         if (ii + 1 != v.end()) os << ",";
     }
-    os << "";
+    os << "]";
     return os;
 }
 
 
 template<class T>
 inline std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
-    os << "";
+    os << "[";
     for (auto ii = v.begin(); ii != v.end(); ++ii) {
         os << " " << ii->to_string() << "";
         if (ii + 1 != v.end()) os << std::endl;
     }
-    os << "";
+    os << "]";
     return os;
 }
 
